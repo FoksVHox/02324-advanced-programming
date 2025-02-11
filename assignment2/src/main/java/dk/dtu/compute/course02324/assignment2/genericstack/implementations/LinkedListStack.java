@@ -27,7 +27,7 @@ public class LinkedListStack<E> implements Stack<E> {
 
     @Override
     public E pop() throws IllegalStateException {
-        if (size == 0) throw new IllegalStateException();
+        if (size == 0) throw new IllegalStateException("stack is empty");
 
         StackElement<E> element = top;
 
@@ -40,14 +40,14 @@ public class LinkedListStack<E> implements Stack<E> {
 
     @Override
     public E top() throws IllegalStateException {
-        if (size == 0) throw new IllegalStateException();
+        if (size == 0) throw new IllegalStateException("stack is empty");
 
         return this.top.value;
     }
 
     @Override
     public void push(@NotNull E value) throws IllegalArgumentException {
-        if (value == null) throw new IllegalArgumentException();
+        if (value == null) throw new IllegalArgumentException("value cannot be null");
         if (size == 0) {
             top = new StackElement<>(value, null);
 

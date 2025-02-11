@@ -49,12 +49,15 @@ public class ArrayStack<E> implements Stack<E> {
 
     @Override
     public void clear() {
-        // TODO must be implemented
+        size = 0;
+        array = (E[]) new Object[DEFAULT_SIZE];
     }
 
     @Override
     public E pop() throws IllegalStateException {
-        if (size == 0) throw new IllegalStateException();
+        if (size == 0) throw new IllegalStateException("stack is empty");
+
+        if (size == array.length/2) array = Arrays.copyOf(array, array.length/2);
 
         E poppedValue = top();
         size--;
@@ -63,16 +66,16 @@ public class ArrayStack<E> implements Stack<E> {
 
     @Override
     public E top() {
-        if (size == 0) throw new IllegalStateException();
+        if (size == 0) throw new IllegalStateException("stack is empty");
         return array[size - 1];
     }
 
     @Override
     public void push(E value) {
-        if(value == null) throw new IllegalArgumentException();
+        if(value == null) throw new IllegalArgumentException("value cannot be null");
 
         if(size >= array.length) {
-            int newCapacity = array.length + DEFAULT_SIZE;
+            int newCapacity = array.length*2;
             E[] newArray = (E[]) new Object[newCapacity];
             System.arraycopy(array, 0, newArray, 0, size);
             array = newArray;

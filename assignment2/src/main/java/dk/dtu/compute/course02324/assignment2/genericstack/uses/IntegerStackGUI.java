@@ -3,15 +3,13 @@ package dk.dtu.compute.course02324.assignment2.genericstack.uses;
 import dk.dtu.compute.course02324.assignment2.genericstack.types.Stack;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
 import javax.validation.constraints.NotNull;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * A GUI element that is attached to an integer stack, and has
@@ -46,6 +44,11 @@ public class IntegerStackGUI extends GridPane {
      * Label showing the last element that was popped from the stack.
      */
     private Label labelLastPopped;
+
+    /**
+     * Show stack trace in exception textarea?
+     */
+    private boolean stackTrace = false;
 
     /**
      * Text area in which the exceptions are shown.
@@ -100,24 +103,41 @@ public class IntegerStackGUI extends GridPane {
         // button for popping the top element from the stack
         Button popButton = new Button("Pop");
         popButton.setOnAction(
-                e -> {
+            e -> {
+                try {
                     lastPopped = stack.pop();
-                    // makes sure that the GUI is updated accordingly
+                } catch (IllegalStateException ex) {
+                    if (stackTrace) {
+                        StringWriter sw = new StringWriter();
+                        PrintWriter pw = new PrintWriter(sw);
+                        ex.printStackTrace(pw);
+                        textAreaExceptions.appendText(sw.toString()+"\n");
+                    } else {
+
+                        textAreaExceptions.appendText(ex.getMessage()+"\n");
+                    }
+
+                } finally {
                     update();
-                });
+                }
+            });
 
         // button for clearing the stack
         Button clearButton = new Button("Clear");
         clearButton.setOnAction(
                 e -> {
                     stack.clear();
+                    textAreaExceptions.clear();
                     // makes sure that the GUI is updated accordingly
                     update();
                 });
 
+        CheckBox checkBox = new CheckBox("Debug mode");
+        checkBox.setOnAction(e -> stackTrace = checkBox.isSelected());
+
         // combines the above elements into two vertically arranged boxes
         // which are then added to the grid pane.
-        VBox actionBox = new VBox(field, pushButton, popButton, clearButton);
+        VBox actionBox = new VBox(field, pushButton, popButton, clearButton,checkBox);
         actionBox.setSpacing(5.0);
         this.add(actionBox, 0, 0);
 
@@ -127,14 +147,14 @@ public class IntegerStackGUI extends GridPane {
 
         Label labelExceptions = new Label("Exceptions:");
         textAreaExceptions = new TextArea();
-        textAreaExceptions.setWrapText(true);
+        textAreaExceptions.setWrapText(false);
         textAreaExceptions.setText("");
         textAreaExceptions.setEditable(false);
-        textAreaExceptions.setScrollTop(Double.MAX_VALUE);
+        textAreaExceptions.setScrollTop(Double.MIN_VALUE);
 
         ScrollPane scrollPane = new ScrollPane(textAreaExceptions);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
         VBox stackStateBox = new VBox(labelTop, labelSize, labelLastPopped, labelExceptions, scrollPane);
         stackStateBox.setSpacing(5.0);
