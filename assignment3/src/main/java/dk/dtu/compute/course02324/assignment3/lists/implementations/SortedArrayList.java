@@ -5,6 +5,7 @@ import dk.dtu.compute.course02324.assignment3.lists.types.List;
 import dk.dtu.compute.course02324.assignment3.lists.types.SortedList;
 
 import javax.validation.constraints.NotNull;
+import java.util.Arrays;
 import java.util.Comparator;
 
 /**
@@ -18,8 +19,7 @@ public class SortedArrayList<E extends Comparable<E>> extends ArrayList<E> imple
 
     @Override
     public boolean add(@NotNull E e) {
-        throw new UnsupportedOperationException("This operation is not yet implemented!");
-        // TODO needs implementation (Assignment 3b)
+        return super.add(e);
     }
 
     /**
@@ -33,13 +33,16 @@ public class SortedArrayList<E extends Comparable<E>> extends ArrayList<E> imple
      * @return the position at which the element should be inserted
      */
     private int findIndexToInsert(@NotNull E e) {
-        // simple implementation finding the index in a linear way
-
-        // TODO implementing and using this method might help you with
-        //      a simple implementation of the add(E e) method.
-        //      (Assignment 3b)
-        return 0;
-
+        for (int i = 0; i < size(); i++) {
+            if (get(i).compareTo(e) >= 0) {
+                return i;
+            }
+        }
+        return size(); // If no larger element is found, insert at the end.
     }
 
+    @Override
+    public void sort(@NotNull Comparator<? super E> c) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
 }

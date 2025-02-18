@@ -136,7 +136,7 @@ public class ArrayList<E> implements List<E> {
     @Override
     public void sort(@NotNull Comparator<? super E> c) throws UnsupportedOperationException {
         if(c == null) throw new IllegalArgumentException();
-        // TODO needs implementation (Assignment 3b)
+        Arrays.sort((E[]) list, 0, size, c);
     }
 
     /**
@@ -153,8 +153,6 @@ public class ArrayList<E> implements List<E> {
         return (E[]) new Object[length];
     }
 
-    // TODO probably some private helper methods here (avoiding duplicated code)
-    //      (Assignment 3a)
     private void isOutOfBounds(int index) throws IndexOutOfBoundsException {
         if (index < 0 || index > size) throw new IndexOutOfBoundsException("Index out of bounds: " + index);
     }
