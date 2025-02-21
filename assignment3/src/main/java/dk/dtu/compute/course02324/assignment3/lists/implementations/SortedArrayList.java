@@ -19,7 +19,10 @@ public class SortedArrayList<E extends Comparable<E>> extends ArrayList<E> imple
 
     @Override
     public boolean add(@NotNull E e) {
-        return super.add(e);
+        if (e == null) throw new IllegalArgumentException();
+        int index = findIndexToInsert(e);
+        super.add(index, e);
+        return true;
     }
 
     /**

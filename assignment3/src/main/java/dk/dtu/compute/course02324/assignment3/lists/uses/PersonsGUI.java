@@ -1,6 +1,6 @@
 package dk.dtu.compute.course02324.assignment3.lists.uses;
 
-
+import dk.dtu.compute.course02324.assignment3.lists.implementations.BubbleSort;
 import dk.dtu.compute.course02324.assignment3.lists.implementations.GenericComparator;
 import dk.dtu.compute.course02324.assignment3.lists.types.List;
 import javafx.geometry.Insets;
@@ -14,7 +14,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A GUI element that is allows the user to interact and
@@ -33,6 +36,9 @@ public class PersonsGUI extends GridPane {
 
     private int weightCount = 1;
 
+    private Label avgWeightLabel;
+    private Label mostFrequentNameLabel;
+
     /**
      * Constructor which sets up the GUI attached a list of persons.
      *
@@ -41,31 +47,57 @@ public class PersonsGUI extends GridPane {
      */
     public PersonsGUI(@NotNull List<Person> persons) {
         this.persons = persons;
-
         this.setVgap(5.0);
         this.setHgap(5.0);
 
         // text filed for user entering a name
         TextField field = new TextField();
         field.setPrefColumnCount(5);
-        field.setText("name");
+        field.setText("enter name");
 
-        // TODO for all buttons installed below, the actions need to properly
-        //      handle (catch) exceptions, and it would be nice if the GUI
-        //      could also show the exceptions thrown by user actions on
-        //      button pressed (cf. Assignment 2).
+        TextField weightField = new TextField();
+        weightField.setPrefColumnCount(5);
+        weightField.setText("enter weight");
+
+        TextField indexField = new TextField();
+        indexField.setPrefColumnCount(5);
+        indexField.setPromptText("Enter index");
+
+        avgWeightLabel = new Label("Average Weight: -");
+        mostFrequentNameLabel = new Label("Most Frequent Name: -");
 
         // button for adding a new person to the list (based on
         // the name in the text field (the weight is just incrementing)
-        // TODO a text field for the weight could be added to this GUI
         Button addButton = new Button("Add");
-        addButton.setOnAction(
-                e -> {
-                    Person person = new Person(field.getText(), weightCount++);
-                    persons.add(person);
-                    // makes sure that the GUI is updated accordingly
-                    update();
-                });
+
+        addButton.setOnAction(e -> {
+            try {
+                String name = field.getText();
+                int weight = Integer.parseInt(weightField.getText());
+                persons.add(new Person(name, weight));
+                update();
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        });
+
+        Button addAtIndexButton = new Button("Add at Index");
+        addAtIndexButton.setOnAction(e -> {
+            try {
+                String name = field.getText();
+                double weight = Double.parseDouble(weightField.getText());
+                int index = Integer.parseInt(indexField.getText());
+
+                if (index < 0 || index > persons.size()) {
+                    throw new IndexOutOfBoundsException("Invalid index: " + index);
+                }
+
+                persons.add(index, new Person(name, weight));
+                update();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
 
         Comparator<Person> comparator = new GenericComparator<>();
 
@@ -73,25 +105,29 @@ public class PersonsGUI extends GridPane {
         // which implement the interface Comparable, which is converted
         // to a Comparator by the GenericComparator above)
         Button sortButton = new Button("Sort");
-        sortButton.setOnAction(
-                e -> {
-                    persons.sort(comparator);
-                    // makes sure that the GUI is updated accordingly
-                    update();
-                });
+        sortButton.setOnAction(e -> {
+            try {
+                BubbleSort.sort(Comparator.comparingDouble(p -> p.weight), persons); // Sort by weight
+                update();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
 
         // button for clearing the list
         Button clearButton = new Button("Clear");
-        clearButton.setOnAction(
-                e -> {
-                    persons.clear();
-                    // makes sure that the GUI is updated accordingly
-                    update();
-                });
+        clearButton.setOnAction(e -> {
+            try {
+                persons.clear();
+                update();
+            } catch (Exception ex){
+                ex.printStackTrace();
+            }
+        });
 
         // combines the above elements into vertically arranged boxes
         // which are then added to the left column of the grid pane
-        VBox actionBox = new VBox(field, addButton, sortButton, clearButton);
+        VBox actionBox = new VBox(field,weightField, addButton, indexField, addAtIndexButton, sortButton, clearButton);
         actionBox.setSpacing(5.0);
         this.add(actionBox, 0, 0);
 
@@ -114,7 +150,7 @@ public class PersonsGUI extends GridPane {
 
         // ... and adds these elements to the right-hand columns of
         // the grid pane
-        VBox personsList = new VBox(labelPersonsList, scrollPane);
+        VBox personsList = new VBox(labelPersonsList, scrollPane, avgWeightLabel, mostFrequentNameLabel);
         personsList.setSpacing(5.0);
         this.add(personsList, 1, 0);
 
@@ -129,28 +165,46 @@ public class PersonsGUI extends GridPane {
      */
     private void update() {
         personsPane.getChildren().clear();
-        // adds all persons to the list in the personsPane (with
-        // a delete button in front of it)
-        for (int i=0; i < persons.size(); i++) {
+        for (int i = 0; i < persons.size(); i++) {
             Person person = persons.get(i);
             Label personLabel = new Label(i + ": " + person.toString());
             Button deleteButton = new Button("Delete");
-            deleteButton.setOnAction(
-                    e -> {
-                        persons.remove(person);
-                        update();
-                    }
-            );
+            deleteButton.setOnAction(e -> {
+                try {
+                    persons.remove(person);
+                    update();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            });
             HBox entry = new HBox(deleteButton, personLabel);
             entry.setSpacing(5.0);
             entry.setAlignment(Pos.BASELINE_LEFT);
             personsPane.add(entry, 0, i);
         }
+        updateStatistics();
     }
 
-    // TODO this GUI could be extended by some additional widgets for issuing other
-    //      operations of lists. And the possibly thrown exceptions should be caught
-    //      in the event handler (and possibly shown in an additional text area for
-    //      exceptions; see Assignment 2).
+    private void updateStatistics() {
+        if (persons.size() == 0) {
+            avgWeightLabel.setText("Average Weight: -");
+            mostFrequentNameLabel.setText("Most Frequent Name: -");
+            return;
+        }
 
+        double totalWeight = 0;
+        Map<String, Integer> nameCounts = new HashMap<>();
+
+        for (int i = 0; i < persons.size(); i++) {
+            Person p = persons.get(i);
+            totalWeight += p.weight;
+            nameCounts.put(p.name, nameCounts.getOrDefault(p.name, 0) + 1);
+        }
+
+        double avgWeight = totalWeight / persons.size();
+        avgWeightLabel.setText(String.format("Average Weight: %.2f kg", avgWeight));
+
+        String mostFrequent = Collections.max(nameCounts.entrySet(), Map.Entry.comparingByValue()).getKey();
+        mostFrequentNameLabel.setText("Most Frequent Name: " + mostFrequent);
+    }
 }

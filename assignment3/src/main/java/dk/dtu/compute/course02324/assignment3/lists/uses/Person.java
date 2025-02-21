@@ -1,11 +1,10 @@
 package dk.dtu.compute.course02324.assignment3.lists.uses;
 
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 public class Person implements Comparable<Person> {
-
     final public String name;
-
     final public double weight;
 
     Person(@NotNull String name, @NotNull double weight) {
@@ -22,9 +21,11 @@ public class Person implements Comparable<Person> {
         if (o == null) {
             throw new IllegalArgumentException("Argument of compareTo() must not be null");
         }
-
-        // TODO this must be implemented properly according
-        throw new UnsupportedOperationException("This operation is not yet implemented");
+        int compareName = this.name.compareTo(o.name);
+        if (compareName != 0) {
+            return compareName;
+        }
+        return Double.compare(this.weight, o.weight);
     }
 
     /**
@@ -53,22 +54,14 @@ public class Person implements Comparable<Person> {
      */
     @Override
     public boolean equals(Object o) {
-        return super.equals(o);
-
-        // TODO this must be implemented in accordance with the compareTo() method!
-        //      See lectures for course 02324!
-        //      Also add JavaDocs for @param and @return !
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        return Double.compare(person.weight, weight) == 0 && name.equals(person.name);
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode();
-
-        // TODO this must be implemented note that hashcode needs to be consistents
-        //      with equals (o1.equals(o1) implies o1.hashCode() == o2.hashCode())!
-        //      See lectures for course 02324
-        //      Also add JavaDocs should be added
+        return Objects.hash(name, weight);
     }
-
-
 }
