@@ -1,0 +1,15 @@
+# This is an example for the contents of the file db.properties, which
+# contains all access information to the database including credentials.
+#
+# Make sure that you never commit the file db.properties with the actual
+# credentials to a repository. Before running the software, though, you
+# need to provide a file db.properties to the software in the subfolder
+# "properties" in the projects resources folder, so that this program
+# knows which database to use along with the access credentials.
+
+HOST=localhost
+PORT=3306
+DATABASE=database_name
+
+USERNAME=user_name
+PASSWORD=password
